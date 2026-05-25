@@ -50,4 +50,46 @@ describe('queue contract: retry respects max_attempts', () => {
       await fs.rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('cancels remaining pending ops when a serial txn reaches a terminal failure', async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agent-remnote-retry-max-'));
+    const dbPath = path.join(tmpDir, 'store.sqlite');
+
+    try {
+      const db = openQueueDb(dbPath);
+      try {
+        const txnId = enqueueTxn(
+          db,
+          [
+            { type: 'update_text', payload: { rem_id: 'r1', text: 'first' }, maxAttempts: 1 },
+            { type: 'update_text', payload: { rem_id: 'r2', text: 'second' }, maxAttempts: 1 },
+          ],
+          { dispatchMode: 'serial' },
+        );
+
+        const claimed = claimNextOp(db, 'conn-1', 30_000);
+        expect(claimed).not.toBeNull();
+
+        const ack = ackRetry(db, {
+          opId: String(claimed!.op_id),
+          attemptId: String(claimed!.attempt_id),
+          lockedBy: 'conn-1',
+          error: { code: 'EXEC_ERROR', message: 'boom' },
+        });
+        expect(ack.ok).toBe(true);
+
+        const rows = db
+          .prepare(`SELECT op_seq, status, dead_reason FROM queue_ops WHERE txn_id=? ORDER BY op_seq ASC`)
+          .all(txnId) as any[];
+
+        expect(rows.map((row) => String(row.status))).toEqual(['dead', 'dead']);
+        expect(String(rows[0].dead_reason)).toContain('boom');
+        expect(String(rows[1].dead_reason)).toContain('txn_failed');
+      } finally {
+        db.close();
+      }
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });

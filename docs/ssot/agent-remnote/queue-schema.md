@@ -216,8 +216,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_workspace_bindings_current
 - 执行成功：置 `succeeded`，写入 `queue_op_results`，更新 `queue_id_map`（若返回新 ID）
 - 可重试失败：`ackRetry` 先递增 `attempt_count`；仅当递增后 `attempt_count < max_attempts` 时，才按指数退避更新 `next_attempt_at` 并回到 `pending`
 - 死亡：当 `ackRetry` 递增后 `attempt_count >= max_attempts`（或明确不可重试）时，直接置 `dead`（不再回到 `pending`），并写入 `queue_op_results` 与 `dead_reason`
-- 事务聚合：当 txn 的所有 op 均 `succeeded` → txn.status='succeeded'；若有 `dead` → 'failed'
+- 事务聚合：当 txn 的所有 op 均 `succeeded` → txn.status='succeeded'；若有 `dead` → 'failed'，并把同 txn 尚未派发的 `pending` op 收敛为 `dead`（`dead_reason=txn_failed:<op_id>`），避免失败事务残留不可派发 pending
 - 统计口径：`queue stats` 的 `pending` 仅统计 `txn.status in (ready,in_progress)` 的 pending op，避免把 `failed/aborted` 事务计入可派发积压
+- 历史治理：`queue cleanup` 默认只 dry-run 预览 `failed/aborted` 终态 txn；只有 `--apply` 才删除选中的 txn，并依赖 Store DB 外键级联清理其 ops/results/attempts/dependencies
 
 ## Lease 策略（SSoT）
 
@@ -254,8 +255,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_workspace_bindings_current
 3. 确认：
    - 成功：`queue_ops.status=succeeded`，写 `queue_op_results`，更新 `queue_id_map`
    - 失败可重试：`queue_ops.status=pending`，`attempt_count+=1`，设退避后的 `next_attempt_at`
-   - 死亡：`queue_ops.status=dead`，`dead_reason` 填写
-4. 归集：若 txn 全部 `succeeded` → 标记 txn 完成；若任一 `dead` → 标记 txn 失败
+   - 死亡：`queue_ops.status=dead`，`dead_reason` 填写；同 txn 尚未派发的 `pending` op 进入 `dead`
+4. 归集：若 txn 全部 `succeeded` → 标记 txn 完成；若任一 `dead` → 标记 txn 失败；终态历史可用 `queue cleanup` dry-run/`--apply` 治理
 
 ## dispatch_mode 语义（v4）
 

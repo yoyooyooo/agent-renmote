@@ -99,6 +99,42 @@ function safeParseJson(s: string) {
   }
 }
 
+function markTxnFailedAndCancelPendingOps(
+  db: QueueDB,
+  params: { readonly txnId: string; readonly failedOpId: string; readonly reason: string; readonly t: number },
+): void {
+  const cancelReason = `txn_failed:${params.failedOpId}`;
+  db.prepare(
+    `INSERT OR REPLACE INTO queue_op_results(op_id, error_code, error_message, finished_at)
+     SELECT op_id, 'TXN_FAILED', @reason, @t
+       FROM queue_ops
+      WHERE txn_id=@txn_id AND status='pending'`,
+  ).run({
+    txn_id: params.txnId,
+    reason: params.reason || cancelReason,
+    t: params.t,
+  });
+
+  db.prepare(
+    `UPDATE queue_ops
+     SET status='dead',
+         dead_reason=@reason,
+         locked_at=NULL,
+         lease_expires_at=NULL,
+         updated_at=@t
+     WHERE txn_id=@txn_id AND status='pending'`,
+  ).run({
+    txn_id: params.txnId,
+    reason: cancelReason,
+    t: params.t,
+  });
+
+  db.prepare(`UPDATE queue_txns SET status='failed', finished_at=@t, updated_at=@t WHERE txn_id=@txn_id`).run({
+    t: params.t,
+    txn_id: params.txnId,
+  });
+}
+
 export function stableHash(obj: any) {
   const json = JSON.stringify(obj, Object.keys(obj).sort());
   return createHash('sha256').update(json).digest('hex').slice(0, 32);
@@ -721,9 +757,11 @@ export function ackRetry(
         },
       });
 
-      db.prepare(`UPDATE queue_txns SET status='failed', finished_at=@t, updated_at=@t WHERE txn_id=@txn_id`).run({
+      markTxnFailedAndCancelPendingOps(db, {
+        txnId: String(current.txn_id),
+        failedOpId: params.opId,
+        reason,
         t,
-        txn_id: String(current.txn_id),
       });
 
       return { ok: true, op_id: params.opId, attempt_id: params.attemptId, duplicate: false } satisfies AckResult;
@@ -842,9 +880,11 @@ export function ackDead(
       detail: { acked_at: t, error_code: params.error.code ?? null },
     });
 
-    db.prepare(`UPDATE queue_txns SET status='failed', finished_at=@t, updated_at=@t WHERE txn_id=@txn_id`).run({
+    markTxnFailedAndCancelPendingOps(db, {
+      txnId: String(current.txn_id),
+      failedOpId: params.opId,
+      reason,
       t,
-      txn_id: String(current.txn_id),
     });
 
     return { ok: true, op_id: params.opId, attempt_id: params.attemptId, duplicate: false } satisfies AckResult;

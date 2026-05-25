@@ -402,6 +402,7 @@ npx add-skill https://github.com/yoyooyooo/agent-remnote -g -a codex -a claude-c
 | Queue stats                              | `agent-remnote --json queue stats`                                                                                                                |
 | Queue stats (+ conflict summary)         | `agent-remnote --json queue stats --include-conflicts`                                                                                            |
 | Conflict surface report                  | `agent-remnote --json queue conflicts`                                                                                                            |
+| Dry-run terminal queue cleanup           | `agent-remnote --json queue cleanup`                                                                                                              |
 | Debug logs                               | `agent-remnote daemon logs --lines 200`                                                                                                           |
 
 Most write commands also support `--wait --timeout-ms <ms> --poll-ms <ms>` to close the loop in a single call. In wait-mode receipts, parse `id_map` first; wrapper-specific ids such as `rem_id` or `portal_rem_id` are secondary sugar derived from the same mapping.

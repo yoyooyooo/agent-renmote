@@ -313,7 +313,16 @@ Wave 1 runtime shape：
 - API port 优先级：`--api-port` > `PORT` / `REMNOTE_API_PORT` > 用户配置文件中的 `apiPort` > 默认 `3000`
 - API base path 优先级：`--api-base-path` > `REMNOTE_API_BASE_PATH` > 用户配置文件中的 `apiBasePath` > 默认 `/v1`
 
-## 7) 运行版本可观测性
+## 7) 队列历史治理
+
+`queue cleanup` 是本地 Store DB 队列历史治理命令：
+
+- 默认 dry-run，输出选中的 terminal txns/ops 数量与样本，不修改 DB
+- 默认目标状态为 `failed/aborted`；`succeeded` 只有显式 `--status succeeded` 才进入候选
+- 只有显式 `--apply` 才删除选中的 `queue_txns`，并依赖 Store DB 外键级联清理关联 ops/results/attempts/dependencies
+- 在 remote mode 下必须 fail-fast，因为该命令直接治理调用方本地 Store DB
+
+## 8) 运行版本可观测性
 
 - `daemon status --json` 必须暴露：
   - `runtime`
@@ -333,7 +342,7 @@ Wave 1 runtime shape：
   - `warnings`
 - 当 current CLI build 与 live daemon / api / plugin build 不一致时，status 输出必须返回稳定 warning，而不是要求用户从日志里猜。
 
-## 8) schema 可观测性
+## 9) schema 可观测性
 
 - `doctor --json` 必须暴露 `queue.schema`：
   - `current_user_version`
@@ -355,7 +364,7 @@ Wave 1 runtime shape：
   - 允许汇报 `restart_summary`，但默认不自动重启 runtime 服务
   - 禁止修改 queue 内容、`remnote.db` 与用户内容数据
 
-## 9) packaged runtime guarantees
+## 10) packaged runtime guarantees
 
 - installed npm package layout 必须能加载 builtin scenario package，不得依赖 source-tree 路径
 - packaged `search --json` 成功路径必须只向 stdout 写一个 JSON envelope
