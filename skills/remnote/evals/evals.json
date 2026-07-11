@@ -1,0 +1,259 @@
+{
+  "skill_name": "remnote",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我已经知道目标 rem id 是 9c1LghrPFSZuzGStA，把它下面现在所有 chunk 全部替换成这段 Markdown：\\n- 发布收口\\n  - 改成 apply 单入口\\n  - 删掉 import 和 plan apply\\n不要等结果，直接给我最短命令。",
+      "expected_output": "Choose the one-step replace path with `rem children replace`, no wait, no pre-read.",
+      "files": [],
+      "expectations": [
+        "Uses `rem children replace` as the primary command",
+        "Does not use `apply --payload` for this single-step write",
+        "Does not add `--wait` by default",
+        "Does not add a preflight `search`, `inspect`, or `outline` step"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把下面这段研究笔记写到今天的 Daily Note 里，直接追加就行，不用确认落库：\\n- Claude Code 研究结论\\n  - skill trigger 要更激进\\n  - 默认不要 wait",
+      "expected_output": "Choose `daily write --markdown -` directly for the Daily Note, keep the content as a single-root outline, and avoid extra bundling when the Markdown already has one top-level root.",
+      "files": [],
+      "expectations": [
+        "Uses `daily write --markdown` as the primary command",
+        "Does not resolve the daily rem id unless the prompt requires a specific child target",
+        "Does not add `--wait` by default",
+        "Preserves the single-root outline shape",
+        "Avoids an unnecessary extra bundle/container root"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "已知 parentRemId 是 qXENhfiOUJiThAamg，把这段结构化内容加到它子级的最上面：\\n- 优先级\\n  - 最短路径\\n  - 最少读取\\n给我一步到位命令。",
+      "expected_output": "Choose `rem children prepend` with the provided rem id.",
+      "files": [],
+      "expectations": [
+        "Uses `rem children prepend`",
+        "Does not use `append` plus a later move",
+        "Does not add validation reads"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "把 rem id 4MZL7Gxd3MIwn3M9J 下面某个测试 section 的 direct children 清空，不要删掉这个 rem 本身，也不用等执行完成。",
+      "expected_output": "Choose `rem children clear`, not `rem delete`, not `replace` with manual empty payload plumbing.",
+      "files": [],
+      "expectations": [
+        "Uses `rem children clear`",
+        "Does not use `rem delete`",
+        "Does not add `--wait` by default"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "先在 rem id 4MZL7Gxd3MIwn3M9J 下面创建一个叫 Weekly Review 的根节点，再在它下面加两条子项：Wins 和 Risks。我要一次发起，多步之间有依赖，但还是默认不要等。",
+      "expected_output": "Choose `apply --payload` with `kind:\"actions\"` because the second step depends on the created rem.",
+      "files": [],
+      "expectations": [
+        "Uses `apply --payload` rather than multiple unrelated shell commands",
+        "Uses an actions envelope with aliasing for the created rem",
+        "Does not add `--wait` by default"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "容器里执行，已经配置了 apiBaseUrl。把 rem id 9c1LghrPFSZuzGStA 下面追加一段 Markdown：\\n- remote write\\n  - should still be shortest path",
+      "expected_output": "Use the same business command shape (`rem children append`) under remote mode, not a separate markdown-specific API route.",
+      "files": [],
+      "expectations": [
+        "Keeps the business command at `rem children append` level",
+        "Does not mention deprecated `import markdown`",
+        "Does not route through a removed `/v1/write/markdown` mental model"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "我已经知道 rem id 是 dmYbmbDWkOKgGcj02，只想把这个 rem 自己的文本改成“提升 10 倍网络性能，Tailscale DERP 发布”，不要动它下面的子级，也不用确认结果。",
+      "expected_output": "Choose `rem set-text`, not children replace or append.",
+      "files": [],
+      "expectations": [
+        "Uses `rem set-text` as the primary command",
+        "Does not use `rem children replace`",
+        "Does not add `--wait` by default"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "把 rem id qXENhfiOUJiThAamg 这整个测试节点删掉，连它下面的子树一起删，别只清空子级。",
+      "expected_output": "Choose `rem delete`, not `rem children clear`.",
+      "files": [],
+      "expectations": [
+        "Uses `rem delete`",
+        "Does not use `rem children clear`",
+        "Does not add validation reads"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "已知 parentRemId 是 9c1LghrPFSZuzGStA，我只想在它下面加一条短纯文本：明天补 PR 描述。给我最短命令，不要写成 Markdown 树。",
+      "expected_output": "Choose `rem create --text`, not a Markdown child command.",
+      "files": [],
+      "expectations": [
+        "Uses `rem create --text`",
+        "Does not use `rem children append` for this short literal text case",
+        "Does not add `--wait` by default"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "我现在只想知道 RemNote 当前 page 和 focus 是什么，越短越好，不要做额外读取。",
+      "expected_output": "Choose `plugin current --compact` as the shortest read path.",
+      "files": [],
+      "expectations": [
+        "Uses `plugin current --compact`",
+        "Does not start with `search` or `outline`",
+        "Keeps the read path to one command"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "已知目标 rem id 是 9c1LghrPFSZuzGStA，把它下面所有 chunk 全部替换成这段 Markdown，而且我这次明确要求你确认落库成功再结束：\\n- release checklist\\n  - update docs\\n  - open PR",
+      "expected_output": "Choose `rem children replace` and add wait because the user explicitly asked to confirm completion.",
+      "files": [],
+      "expectations": [
+        "Uses `rem children replace`",
+        "Adds `--wait` because the user explicitly requested confirmation",
+        "Does not insert an extra preflight read before the write"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "先在 rem id 4MZL7Gxd3MIwn3M9J 下面创建一个叫 Ship Checklist 的根节点，再在它下面加三条子项：Docs、Tests、PR。我要一次发起，而且因为下一步要继续引用这个新节点，你需要确认这次写入已经完成。",
+      "expected_output": "Choose `apply --payload` for the dependency chain and include wait because the next step depends on completion.",
+      "files": [],
+      "expectations": [
+        "Uses `apply --payload` with `kind:\"actions\"`",
+        "Uses aliasing for the created node",
+        "Uses `--wait` or equivalent explicit completion confirmation because the prompt requires it"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "我现在选中了 RemNote 里一个标题节点，想继续往下分层展开讲讲。目标是保留这个标题本身，只把它下面的内容重写成更清楚的大纲，不要在页面根下新增并列节点。",
+      "expected_output": "Treat this as an expand-existing-Rem task: prefer a lightweight structure read if needed, then rewrite the selected rem's children instead of writing a new Daily Note root.",
+      "files": [],
+      "expectations": [
+        "Treats the task as expansion of an existing rem",
+        "Prefers `rem children replace` over `daily write`",
+        "Does not create a new sibling root at the page level"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "把这份调研总结写到今天日记里，要求由浅入深、单一主线、后面还能继续往下展开：\\n- Web 抓取策略总结\\n  - 登录态\\n  - 节奏控制\\n  - 错误恢复",
+      "expected_output": "Recognize this as report-style outline material, preserve the single-root structure, and explicitly avoid extra bundling.",
+      "files": [],
+      "expectations": [
+        "Recognizes the content as report-style outline material",
+        "Keeps a single top-level root",
+        "Avoids extra bundle/container wrapping when the Markdown already has one root"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "把这段连续论证原样记到今天的日记里：\\n我们已经知道 A，所以自然会问 B。假设 C 成立，就可以推出 D，接着再说明 E。先不要为了规整去强行拆成大纲。",
+      "expected_output": "Recognize that this prose is not naturally outline-shaped and keep normal writing instead of forcing a single-root outline rewrite.",
+      "files": [],
+      "expectations": [
+        "Does not force outline-first rewriting for prose that is not naturally outline-shaped",
+        "Keeps normal writing acceptable for the content type",
+        "Does not claim that all Daily Note content must become a single-root outline"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "我记不清 `dn_recent_todos_to_today_move` 这条 builtin scenario 的 var 名和默认时间范围了。先别真的执行，给我最稳的检查顺序和最终 dry-run 命令。我想把过去 3 天的 DN todo 搬到今天。",
+      "expected_output": "Use help-first and builtin/schema discovery before composing the dry-run command. The final example should use the move variant, `source_scope=daily:past-3d`, `target_ref=daily:today`, and `--dry-run`.",
+      "files": [],
+      "expectations": [
+        "Uses a discovery flow such as `scenario builtin list`, `scenario builtin install`, or `scenario schema explain` before final execution",
+        "Uses `source_scope=daily:past-3d`",
+        "Uses `target_ref=daily:today`",
+        "Uses `--dry-run` before any real write",
+        "Does not use the retired `daily:previous-*` token"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "我有个 `~/.agent-remnote/scenarios/recent-review.json`，想先知道它支持哪些 vars 再决定怎么 run。现在处于 `apiBaseUrl` 模式。给我最短的 authoring / explain 路径，不要直接写入。",
+      "expected_output": "Route to local `scenario schema explain` against the file spec, explicitly note that schema tooling remains local even under apiBaseUrl, and avoid jumping straight to scenario run.",
+      "files": [],
+      "expectations": [
+        "Uses `scenario schema explain --spec` against the scenario file",
+        "Notes that `scenario schema` stays local even when `apiBaseUrl` is configured",
+        "Does not jump straight to `scenario run`",
+        "Does not claim that schema tooling is forwarded to Host API"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "我想把过去 2 天 DN 里的 todo 先以 portal 方式汇总到今天，但先别真的写。builtin id 和时间范围我都记不清了。给我最稳的检查顺序和 dry-run 命令。",
+      "expected_output": "Route to the portal builtin variant, discover parameters first, and compose a dry-run command with `source_scope=daily:past-2d` and `target_ref=daily:today`.",
+      "files": [],
+      "expectations": [
+        "Uses the portal variant rather than the move variant",
+        "Uses a discovery step such as `scenario builtin list` or `scenario schema explain`",
+        "Uses `source_scope=daily:past-2d`",
+        "Uses `target_ref=daily:today`",
+        "Uses `--dry-run` before any real write"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "上游已经给了一个 RemNote asset plan：destination=existing-rem，anchor remId=9c1LghrPFSZuzGStA，mutation=replace-children，body 是下面这棵树。请直接执行路由，不要重新改写内容，也不用等：\\n- Runtime Session\\n  - owns one attempt",
+      "expected_output": "Consume the semantic handoff as authoritative and map it directly to rem children replace without reshaping or waiting.",
+      "files": [],
+      "expectations": [
+        "Uses rem children replace against the supplied remId",
+        "Preserves the supplied Markdown hierarchy and wording",
+        "Does not invoke content redesign or SRS card design",
+        "Does not add a pre-read or wait"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "这是一整篇论文，我还没决定哪些内容值得长期记，也没设计卡片。帮我直接写成 RemNote SRS 卡并落库。",
+      "expected_output": "Recognize that execution cannot safely start from raw material: route card cognition to srs-card-engineering, RemNote placement/shape to remnote-best-practice, then execute with remnote once a concrete plan exists.",
+      "files": [],
+      "expectations": [
+        "Does not mechanically turn the raw paper into write commands",
+        "Routes SRS card design to srs-card-engineering",
+        "Routes RemNote destination and structure to remnote-best-practice",
+        "Keeps remnote responsible for final addressing and execution"
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "只想看看当前 RemNote 的 page、focused rem 和 selection，然后把结果告诉我，不要改任何内容。",
+      "expected_output": "Use the narrow current-context read path and perform no write or semantic note-design work.",
+      "files": [],
+      "expectations": [
+        "Uses plugin current --compact or the minimal current-context commands",
+        "Does not invoke a write command",
+        "Does not route through remnote-best-practice",
+        "Does not search the whole knowledge base"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "我已经给了一个完整落库计划，需要创建独立页，然后下一步马上要用新 remId 给它打 tag；这两个动作要一次提交并确认完成。",
+      "expected_output": "Use an actions apply envelope with an alias/created-ID dependency and wait because the subsequent action and user requirement depend on completion.",
+      "files": [],
+      "expectations": [
+        "Uses apply --payload with dependent actions",
+        "Carries the created Rem through an alias or equivalent dependency reference",
+        "Includes wait or terminal confirmation",
+        "Does not split the operation into unrelated shell commands"
+      ]
+    }
+  ]
+}

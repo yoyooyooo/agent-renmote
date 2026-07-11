@@ -1,0 +1,98 @@
+[
+  {
+    "query": "我现在就在 RemNote 桌面端里，选中了一个标题 Rem。标题保留，把它下面的 direct children 全部替换成我给的 Markdown，不要写到页面根，也不要等。",
+    "should_trigger": true
+  },
+  {
+    "query": "容器里已经配置 apiBaseUrl。请把 rem id 4MZL7Gxd3MIwn3M9J 下面追加一棵 Markdown 树，不能碰容器本地的 remnote.db。",
+    "should_trigger": true
+  },
+  {
+    "query": "告诉我 RemNote 当前 page、focused rem 和 selection，走最低 token 的读取路径。",
+    "should_trigger": true
+  },
+  {
+    "query": "agent-remnote 返回 sent=0，而我下一步依赖这次写入。帮我按 queue、daemon、plugin 的最短信号链排查并确认事务结果。",
+    "should_trigger": true
+  },
+  {
+    "query": "我有 ~/.agent-remnote/scenarios/recent-review.json，先 explain 它的 vars，再 dry-run；当前是 apiBaseUrl 模式。",
+    "should_trigger": true
+  },
+  {
+    "query": "把当前选中的 Rem 提升成独立页并在原位置留 portal，请选 agent-remnote 的直接 promotion route。",
+    "should_trigger": true
+  },
+  {
+    "query": "清空这个 Rem 的 direct children，但保留 Rem 自己。id 是 qXENhfiOUJiThAamg。",
+    "should_trigger": true
+  },
+  {
+    "query": "RemNote 里已有一个 single_select property；远端 apiBaseUrl 模式下给它新增 option，并先判断是否支持透明远端执行。",
+    "should_trigger": true
+  },
+  {
+    "query": "上游给了完整 RemNote asset plan：existing-rem、replace-children、remId 已知、Markdown 已定稿。直接执行，不要重新组织内容。",
+    "should_trigger": true
+  },
+  {
+    "query": "把 rem id dmYbmbDWkOKgGcj02 自己的文本改掉，子级保持原样。给我最短命令。",
+    "should_trigger": true
+  },
+  {
+    "query": "把这段已经整理好的研究条目写到今天的 RemNote Daily Note，默认只需要成功入队。",
+    "should_trigger": true
+  },
+  {
+    "query": "先创建一个独立 Rem，然后用新 remId 继续建 portal 和 tag；动作有依赖，要一个 apply envelope 并确认完成。",
+    "should_trigger": true
+  },
+  {
+    "query": "我还没准备写入。请只帮我判断这批研究结论哪些应该留在 Daily Note，哪些值得独立成长期概念页，并设计链接关系。",
+    "should_trigger": false
+  },
+  {
+    "query": "从这本书设计一套高质量 SRS 卡，先做 Learning Map、Core Deck 和迁移题；输出中立 JSON，不要写 RemNote。",
+    "should_trigger": false
+  },
+  {
+    "query": "把这段架构说明去高熵化，面向刚接手项目的人讲清楚术语和因果，但暂时不要沉淀到任何笔记软件。",
+    "should_trigger": false
+  },
+  {
+    "query": "把 Notion 页面下面的所有 block 替换成新内容，并同步回 Notion 数据库。",
+    "should_trigger": false
+  },
+  {
+    "query": "把这份内容追加到 Obsidian 今天的 Markdown 日记，顺便整理 YAML frontmatter。",
+    "should_trigger": false
+  },
+  {
+    "query": "BullMQ 有个 job 卡住了，帮我判断是 lease 还是 worker handler 的问题。",
+    "should_trigger": false
+  },
+  {
+    "query": "React 组件里先 clear children 再重建树，帮我重构 state。",
+    "should_trigger": false
+  },
+  {
+    "query": "直接改 SQLite notes 表里的 parentId 和 title，并补 updated_at。",
+    "should_trigger": false
+  },
+  {
+    "query": "我在代码里定义了 remId 和 parentRemId 两个变量，但这是普通树编辑器，不是 RemNote；帮我写 TypeScript 类型。",
+    "should_trigger": false
+  },
+  {
+    "query": "比较 PARA、Zettelkasten 和 evergreen notes 的优缺点，不需要针对任何具体软件执行操作。",
+    "should_trigger": false
+  },
+  {
+    "query": "给 Anki 导出一份 TSV 卡组，字段是 Front、Back、Extra、Tags，和 RemNote 无关。",
+    "should_trigger": false
+  },
+  {
+    "query": "写一个 Markdown 文件叫 Daily Note.md，保存到项目 docs 目录。",
+    "should_trigger": false
+  }
+]
