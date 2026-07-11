@@ -45,6 +45,7 @@
     "project-scaffold": "symlink",
     "proof-step-implementation": "symlink",
     "read-working-memory": "symlink",
+    "remnote": "symlink",
     "requirements-eval-rubric": "symlink",
     "save-thread": "symlink",
     "scenario-compiler-fit": "symlink",
@@ -62,5 +63,5 @@
   "mtimes": {
     "remnote": 1772988292764398449
   },
-  "updated_at": "2026-07-11T21:28:38.356168+08:00"
+  "updated_at": "2026-07-11T21:30:08.83863+08:00"
 }
