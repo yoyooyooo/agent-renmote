@@ -402,6 +402,7 @@ npx add-skill https://github.com/yoyooyooo/agent-remnote -g -a codex -a claude-c
 | 队列统计                           | `agent-remnote --json queue stats`                                                                                                                |
 | 队列统计（含冲突摘要）             | `agent-remnote --json queue stats --include-conflicts`                                                                                            |
 | 查看冲突面报告                     | `agent-remnote --json queue conflicts`                                                                                                            |
+| dry-run 清理终态队列记录           | `agent-remnote --json queue cleanup`                                                                                                              |
 | 查看日志                           | `agent-remnote daemon logs --lines 200`                                                                                                           |
 
 多数写入命令也支持 `--wait --timeout-ms <ms> --poll-ms <ms>`，用于一次调用闭环确认 txn 终态。进入 wait-mode 后，优先解析 `id_map`；`rem_id`、`portal_rem_id` 这类字段只是从同一映射派生出来的便捷字段。

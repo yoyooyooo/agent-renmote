@@ -3,6 +3,11 @@ import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 
 import { CliError, isCliError } from './Errors.js';
+import {
+  cleanupQueueTxns as applyQueueCleanup,
+  previewQueueCleanup,
+  type QueueCleanupStatus,
+} from '../lib/queueCleanup.js';
 
 import {
   enqueueTxn,
@@ -15,6 +20,8 @@ import {
 
 export type QueueStats = ReturnType<typeof getQueueStats>;
 export type QueueConflictsReport = ReturnType<typeof getQueueConflicts>;
+export type QueueCleanupPreview = ReturnType<typeof previewQueueCleanup>;
+export type QueueCleanupResult = ReturnType<typeof applyQueueCleanup>;
 
 export type EnqueueOpInput = {
   readonly type: string;
@@ -61,6 +68,13 @@ export interface QueueService {
     readonly txnId?: string | undefined;
     readonly opId?: string | undefined;
   }) => Effect.Effect<InspectResult, CliError>;
+  readonly cleanup: (params: {
+    readonly dbPath: string;
+    readonly apply?: boolean | undefined;
+    readonly statuses?: readonly QueueCleanupStatus[] | undefined;
+    readonly olderThanMs?: number | undefined;
+    readonly limit?: number | undefined;
+  }) => Effect.Effect<QueueCleanupPreview | QueueCleanupResult, CliError>;
 }
 
 export class Queue extends Context.Tag('Queue')<Queue, QueueService>() {}
@@ -289,6 +303,33 @@ export const QueueLive = Layer.succeed(Queue, {
           }));
 
           return { txn, ops: detail, id_map: idMap };
+        } finally {
+          db.close();
+        }
+      },
+      catch: (error) => {
+        if (isCliError(error)) return error;
+        if (error instanceof QueueSchemaError) return cliErrorFromQueueSchema(dbPath, error);
+        return new CliError({
+          code: 'QUEUE_UNAVAILABLE',
+          message: 'Store database is unavailable',
+          exitCode: 1,
+          details: { db_path: dbPath, error: String((error as any)?.message || error) },
+          hint: [
+            'agent-remnote doctor',
+            'agent-remnote config print',
+            'Override the store db path with --store-db (or set REMNOTE_STORE_DB)',
+          ],
+        });
+      },
+    }),
+  cleanup: ({ dbPath, apply, statuses, olderThanMs, limit }) =>
+    Effect.try({
+      try: () => {
+        const db = openQueueDb(dbPath);
+        try {
+          const params = { statuses, olderThanMs, limit };
+          return apply ? applyQueueCleanup(db, params) : previewQueueCleanup(db, params);
         } finally {
           db.close();
         }

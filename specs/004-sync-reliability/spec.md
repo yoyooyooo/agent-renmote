@@ -150,6 +150,7 @@
 
 1) 进度查询：提供 `agent-remnote queue progress --txn <id>`（面向 Agent 的稳定、轻量入口）。  
 2) score 语义：以 txn 中 ops 的终态聚合；`dead` 计入“完成”但标记失败（用于把“已终止/不可重试”与“仍在进行”区分开）。  
+3) 失败收敛：txn 内任一 op 进入不可重试 dead 后，同 txn 尚未派发的 pending op 必须被收敛为 dead，避免失败事务长期保留不可派发 pending。
 
 ## Functional Requirements
 

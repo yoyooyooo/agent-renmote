@@ -68,6 +68,7 @@ Wave 1 execution note：
   - `agent-remnote queue conflicts`：输出 pending 冲突面报告（用于消费前风险判断与排障）。
   - `agent-remnote queue inspect`：查看指定事务/操作详情。
   - `agent-remnote queue wait`：阻塞等待事务进入终态（succeeded/failed/aborted），用于 write-first 闭环验证。
+  - `agent-remnote queue cleanup`：清理 Store DB 中终态 queue txn 历史；默认 dry-run，只预览 `failed/aborted`，显式 `--apply` 才删除。
   - `agent-remnote daemon sync`（或脚本 `ws-trigger-sync.ts`）：通过 WS 通知插件开始同步。
 
 ## Agent 工作流（write-first）

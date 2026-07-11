@@ -19,6 +19,10 @@ export function parseResultJson(raw: any): any {
   return null;
 }
 
+function resultErrorCode(op: any): string {
+  return normalizeString(op?.result?.error_code);
+}
+
 export function buildPartialCreateReceipt(params: {
   readonly txnId: string;
   readonly detail: any;
@@ -36,7 +40,11 @@ export function buildPartialCreateReceipt(params: {
   if (!remId) return undefined;
 
   const ops = Array.isArray(params.detail?.ops) ? params.detail.ops : [];
-  const nonPortalFailed = ops.some((op: any) => String(op?.type ?? '') !== 'create_portal' && String(op?.status ?? '') !== 'succeeded');
+  const nonPortalFailed = ops.some((op: any) => {
+    if (String(op?.type ?? '') === 'create_portal') return false;
+    if (String(op?.status ?? '') === 'succeeded') return false;
+    return resultErrorCode(op) !== 'TXN_FAILED';
+  });
   const portalOp = ops.find((op: any) => String(op?.type ?? '') === 'create_portal');
   const portalFailed = portalOp && String(opPortalStatus(portalOp)) !== 'succeeded';
   if (nonPortalFailed || !portalFailed) return undefined;
@@ -115,9 +123,12 @@ export function buildMovePromotionReceipt(params: {
   ];
 
   const inPlacePortalId = normalizeString(moveResult?.portal_id) || undefined;
-  const portalPlacementKind = params.intent.portalPlacement.kind === 'none' ? undefined : params.intent.portalPlacement.kind;
+  const portalPlacementKind =
+    params.intent.portalPlacement.kind === 'none' ? undefined : params.intent.portalPlacement.kind;
   const portalCreated =
-    params.intent.portalPlacement.kind === 'in_place_single_rem' ? moveResult?.portal_created === true : Boolean(portalRemId);
+    params.intent.portalPlacement.kind === 'in_place_single_rem'
+      ? moveResult?.portal_created === true
+      : Boolean(portalRemId);
   const effectivePortalRemId =
     params.intent.portalPlacement.kind === 'in_place_single_rem' ? inPlacePortalId : portalRemId;
 
@@ -132,7 +143,9 @@ export function buildMovePromotionReceipt(params: {
     source_context: {
       source_kind: 'targets',
       source_origin: 'move_single_rem',
-      ...(normalizeString(moveResult?.source_parent_id) ? { parent_id: normalizeString(moveResult?.source_parent_id) } : {}),
+      ...(normalizeString(moveResult?.source_parent_id)
+        ? { parent_id: normalizeString(moveResult?.source_parent_id) }
+        : {}),
     },
     portal: {
       requested: params.intent.portalPlacement.kind !== 'none',
