@@ -1,0 +1,42 @@
+name: Package Whitepaper Compiler Skill
+
+on:
+  push:
+    branches:
+      - artifact/whitepaper-compiler-v1.0.0
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out package branch
+        uses: actions/checkout@v4
+
+      - name: Validate package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f whitepaper-compiler/SKILL.md
+          test -f whitepaper-compiler/REFERENCE.md
+          test -f whitepaper-compiler/TEMPLATE.md
+          test -f whitepaper-compiler/CONFORMANCE.md
+          test -f whitepaper-compiler/EVALS.md
+          test -f whitepaper-compiler/README.md
+          grep -q '^name: whitepaper-compiler$' whitepaper-compiler/SKILL.md
+          grep -q '^description:' whitepaper-compiler/SKILL.md
+          grep -q 'REFERENCE.md' whitepaper-compiler/SKILL.md
+          grep -q 'TEMPLATE.md' whitepaper-compiler/SKILL.md
+          grep -q 'CONFORMANCE.md' whitepaper-compiler/SKILL.md
+
+      - name: Upload installable skill package
+        uses: actions/upload-artifact@v4
+        with:
+          name: whitepaper-compiler-skill-v1.0.0
+          path: whitepaper-compiler/
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: true
