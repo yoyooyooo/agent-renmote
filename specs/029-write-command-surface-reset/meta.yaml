@@ -1,9 +1,0 @@
-id: "029-write-command-surface-reset"
-title: "Write Command Surface Reset With Subject/From/To/At/Portal Axes"
-owners:
-  - "yoyooyooo"
-tags:
-  - "cli"
-  - "write"
-  - "portal"
-  - "breaking-change"

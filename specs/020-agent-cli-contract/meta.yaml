@@ -1,9 +1,0 @@
-id: "020-agent-cli-contract"
-title: "Agent-First CLI Contract Reset"
-owners:
-  - "@yoyooyooo"
-tags:
-  - "cli"
-  - "host-api"
-  - "remnote"
-  - "write-contract"
